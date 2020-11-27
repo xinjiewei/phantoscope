@@ -8,32 +8,41 @@ services:
       - MINIO_ADDR=${LOCAL_ADDRESS}:9000
       - UPLOAD_FOLDER=/tmp
       - MILVUS_ADDR=milvus
-      - SEARCH_IMAGES_DATABASE_EP=mysql://root:passwd@mysql:3306/search
-      - SEARCH_IMAGES_DATABASE_USERNAME=root
-      - SEARCH_IMAGES_DATABASE_PASSWD=passwd
+#      - SEARCH_IMAGES_DATABASE_EP=mysql://root:passwd@mysql:3306/search
+#      - SEARCH_IMAGES_DATABASE_USERNAME=root
+#      - SEARCH_IMAGES_DATABASE_PASSWD=passwd
       - MILVUS_PORT=19530
       - MINIO_BUCKET_NUM=20
       - MONGO_ADDR=mongo
       - MONGO_PORT=27017
-      - MONGO_USERNAME=root
-      - MONGO_PASSWD=passwd
+      - MONGO_USERNAME=
+      - MONGO_PASSWD=
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - milvus
       - minio
       - mongo
+      - vgg
+    networks:
+      - phantoscope-network
+  vgg:
+    image: psoperator/vgg16-encoder:latest
+    ports:
+      - "50001:50001"
+    environment:
+      - OP_ENDPOINT=${LOCAL_ADDRESS}:50001
     networks:
       - phantoscope-network
   mongo:
     image: mongo
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=passwd
+      - MONGO_INITDB_ROOT_USERNAME=
+      - MONGO_INITDB_ROOT_PASSWORD=
     ports:
       - "27017:27017"
     volumes:
-      - /mnt/ps/mongo:/data/db
+      - /Users/jackxin/jack/milvus_mongo:/data/db
     networks:
       - phantoscope-network
   milvus:
@@ -42,7 +51,7 @@ services:
       - "19530:19530"
       - "19121:19121"
     volumes:
-      - /mnt/ps/milvus/db:/var/lib/milvus/db
+      - /Users/jackxin/jack/milvus/db:/var/lib/milvus/db
     networks:
       - phantoscope-network
   minio:
@@ -50,7 +59,7 @@ services:
     ports:
       - "9000:9000"
     volumes:
-      - /mnt/ps/minio/data:/data
+      - /Users/jackxin/jack/minio/data:/data
     command: ["server","/data"]
     networks:
       - phantoscope-network
